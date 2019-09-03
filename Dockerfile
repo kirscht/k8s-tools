@@ -6,7 +6,7 @@ ENV terraform_release 0.12.5
 ENV terraform_zip terraform_${terraform_release}_linux_amd64.zip
 ENV pkgs git bash ncurses docker-cli python3 ca-certificates openssh groff jq curl make
 ENV dev_pkgs python-dev python3-dev musl-dev linux-headers libffi-dev build-base openssl-dev gcc
-ENV pip_pkgs ansible awscli s3cmd python-magic ec2instanceconnectcli
+ENV pip_pkgs ansible awscli s3cmd python-magic ec2instanceconnectcli boto3
 
 ENV kubectx_url https://github.com/ahmetb/kubectx.git
 
@@ -41,3 +41,8 @@ RUN (cd /usr/local/bin/ ; \
 #  https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management
 RUN apk del ${dev_pkgs}
 # RUN apk -v cache clean
+RUN addgroup -S kkirscht && adduser -S kkirscht -G kkirscht -s /bin/bash
+
+COPY files /
+RUN  chown -R kkirscht:kkirscht /home/kkirscht/ && chmod a+x /home/kkirscht/.bashrc
+RUN  echo '[[ -x ${HOME}/.bashrc ]] && . ${HOME}/.bashrc'
