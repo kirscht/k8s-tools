@@ -1,4 +1,5 @@
-DOCKER_IMAGE = k8s-tools
+TTAG = develop
+DOCKER_IMAGE = kirscht/k8s-tools:develop
 
 KUBERNETES_TOOLS := docker run \
 		-ti \
@@ -15,6 +16,9 @@ KUBERNETES_TOOLS := docker run \
 
 build:
 	docker build -t $(DOCKER_IMAGE) .
+
+push:
+	docker push $(DOCKER_IMAGE)
 
 .PHONY: build
 

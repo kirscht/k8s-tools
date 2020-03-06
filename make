@@ -1,3 +1,7 @@
 #!/bin/bash
+exit
 
-docker build -t k8s-tools .
+export TTAG=develop
+
+docker build -t kirscht/k8s-tools:${TTAG} .
+docker push kirscht/k8s-tools:${TTAG}
