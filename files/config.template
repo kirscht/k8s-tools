@@ -1,0 +1,8 @@
+Host {{ item.host | default("localhost") }}
+    HostName {{ item.hostname | default("localhost")}}
+    User     {{ item.user | default("git") }}
+    IdentityFile {{ home }}/.ssh/{{ item.identityfile | default("rsa") }}
+    StrictHostKeyChecking {{ item.stricthostkeychecking | default("no") }}
+    UserKnownHostsFile {{ item.userknownhostsfile | default("/dev/null") }}
+    AddKeysToAgent {{ item.addkeystoagent | default("yes") }}
+    UseKeyChain {{ item.usekeychain | default("yes") }}

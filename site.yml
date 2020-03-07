@@ -1,0 +1,94 @@
+---
+
+- name: Create .ssh Directory or Set Permissions
+  hosts: localhost
+  gather_facts: false
+# become: true
+  tasks:
+  - name: 1 Create .ssh Directory or Set Permissions
+    set_fact:
+      home: "{{ lookup('env', 'HOME') }}"
+      repos: [ 
+        { repo: "github:kirscht/k8s-tools.git", dest: "github/k8s-tools" },
+        { repo: "github:kirscht/k8s-tools.git", dest: "github/k8s-tools" },
+        { repo: "github:kirscht/tagging.git", dest: "github/tagging" },
+        { repo: "github:kirscht/wmvault.git", dest: "github/wmvault" },
+        { repo: "github:kirscht/mac-setup.git", dest: "github/mac-setup" },
+        { repo: "github:kirscht/wmredis.git", dest: "github/wmredis" },
+        { repo: "github:kirscht/buildcontainer.git", dest: "github/buildcontainer" },
+        { repo: "github:kirscht/wmnginx.git", dest: "github/wmnginx" },
+        { repo: "github:kirscht/wmapp.git", dest: "github/wmapp" },
+        { repo: "github:kirscht/wmpostgres.git", dest: "github/wmpostgres" },
+        { repo: "github:kirscht/extended-choice-parameter-plugin.git", dest: "github/extended-choice-parameter-plugin" },
+        { repo: "github:kirscht/terraform.git", dest: "github/terraform" },
+        { repo: "github:kirscht/exploringgo.git", dest: "github/exploringgo" },
+        { repo: "github:kirscht/arcusnet.git", dest: "github/arcusnet" },
+        { repo: "github:kirscht/gcp.git", dest: "github/gcp" },
+        { repo: "github:kirscht/weather.git", dest: "github/weather" },
+        { repo: "github:kirscht/investing.git", dest: "github/investing" },
+        { repo: "github:kirscht/fte.git", dest: "github/fte" },
+        { repo: "github:kirscht/logstash-forwarder.git", dest: "github/logstash-forwarder" },
+        { repo: "github:coding-boot-camp/Cybersecurity-Lesson-Plans.git", dest: "2u/uci/Cybersecurity-Lesson-Plans", force: "yes" },
+        { repo: "ucibootcamp:UCI-Coding-Bootcamp/uci-irv-cyber-pt-03-2020-u-c.git", dest: "2u/uci/uci-irv-cyber-pt-03-2020-u-c" },
+        { repo: "github:kirscht/rancher-docker-desktop.git", dest: "github/rancher-docker-desktop" },
+        { repo: "github:kirscht/mac-packet-filter.git", dest: "github/mac-packet-filter" }
+	]
+      gitignore_lines: [ '.gitignore',
+		'.idea/',
+		'*.iml' ]
+
+  - name: Create ssh directories
+    file:
+        path: "{{ item.path }}"
+        state: directory
+        mode: "{{ item.mode }}"
+    with_items:
+        - { path: "{{ home }}/.ssh", mode: "u=rwx,g=,o=" }
+        - { path: "{{ home }}/.ssh/config.d", mode: "u=rwx,g=,o=" }
+        - { path: "{{ home }}/Repositories", mode: "u=rwx,g=,o=" }
+        - { path: "{{ home }}/Repositories/github", mode: "u=rwx,g=,o=" }
+        - { path: "{{ home }}/Repositories/gitlab", mode: "u=rwx,g=,o=" }
+        - { path: "{{ home }}/Repositories/2u", mode: "u=rwx,g=,o=" }
+
+  - name: Create config file
+    copy:
+        src: "files/config"
+        dest: "{{ home }}/.ssh"
+
+  - name: Create config files
+    template:
+        src: "files/config.template"
+        dest: "{{ home }}/.ssh/config.d/{{ item.host }}"
+    with_items:
+      - { host: "ucibootcamp", hostname: "uci.bootcampcontent.com", identityfile: "bootcamp" }
+      - { host: "github", hostname: "github.com", identityfile: "kkirscht2" }
+
+  - name: Custom Commands
+    lineinfile:
+      path: "{{ home }}/.bashrc"
+      create: yes
+      mode: "0700"
+      line: "{{ item }}"
+    with_items:
+      - "alias initenv='ansible-playbook --connection=local --inventory 127.0.0.1 ./site.yml'"
+
+  - name: Get the repos
+    git:
+      repo: "{{ item.repo }}"
+      version: master
+      dest: "{{ home }}/Repositories/{{ item.dest }}"
+      force: "{{ item.force | default(\"no\") }}"
+      #update: "{{ item.update | default('1') }}"
+    with_items:
+      "{{ repos }}"
+
+  - name: Create .gitignore 
+    lineinfile:
+      path: "{{ home }}/Repositories/{{ item[0].dest }}/.gitignore"
+      create: yes
+      mode: "0700"
+      line: "{{ item[1] }}"
+    with_nested:
+      - "{{ repos }}"
+      - "{{ gitignore_lines }}"
+
