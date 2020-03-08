@@ -36,6 +36,31 @@
       gitignore_lines: [ '.gitignore',
 		'.idea/',
 		'*.iml' ]
+      homebrew_pkgs: [
+        "ansible",
+        "wireshark" ]
+      homebrew_cask_pkgs: [
+        "virtualbox",
+        "gitkraken",
+        "grammarly",
+        "visual-studio-code",
+        "wireshark" ]
+
+  - name: homebrew_pkgs
+    homebrew:
+      name: "{{ item }}"
+      state: latest
+      update_homebrew: yes
+      upgrade_all: yes
+    with_items:
+      - [ "{{ homebrew_pkgs }}" ]
+
+  - name: homebrew_cask_pkgs
+    homebrew_cask:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+      - [ "{{ homebrew_cask_pkgs }}" ]
 
   - name: Create ssh directories
     file:
@@ -79,6 +104,7 @@
       dest: "{{ home }}/Repositories/{{ item.dest }}"
       force: "{{ item.force | default(\"no\") }}"
       #update: "{{ item.update | default('1') }}"
+    ignore_errors: yes
     with_items:
       "{{ repos }}"
 
